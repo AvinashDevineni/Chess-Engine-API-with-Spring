@@ -44,6 +44,10 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.14.0'
 }
 
+application {
+    mainClass = 'com.chessengine.api.ChessEngineApplication'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
