@@ -15,7 +15,7 @@ import com.github.bhlangonijr.chesslib.Board;
 public class ChessEngineController
 {
     @GetMapping("/api/move")
-    @CrossOrigin(origins = ChessEngineApplication.PICKLE_ENGINE_URL)
+    @CrossOrigin(origins = ChessEngineApplication.ENGINE_URL)
     public MoveResponse GetEngineMove(@RequestParam Map<String, String> _queryParameters)
     {
         ChessEngine _engine = new ChessEngine(new Board());

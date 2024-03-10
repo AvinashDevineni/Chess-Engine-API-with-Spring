@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChessEngineApplication
 {
-    public static final String PICKLE_ENGINE_URL = "http://localhost:3000";
+    public static final String ENGINE_URL = "https://epic-chess-engine.onrender.com/";
     
     public static void main(String[] args)
     {
