@@ -20,7 +20,6 @@ public class ChessEngineController
     public MoveResponse GetEngineMove(@RequestParam Map<String, String> _queryParameters)
     {
         ChessEngineService _engine = new ChessEngineService(new Board());
-        _engine.getBoard().loadFromFen(_queryParameters.get("fen"));
 
         int _numPlies = 3;
         if (_queryParameters.containsKey("numPlies"))
@@ -28,6 +27,24 @@ public class ChessEngineController
             try { _numPlies = Integer.parseInt(_queryParameters.get("numPlies")); }
             catch (Exception _e) {}
         }
+
+        // load from pgn if provided
+        if (_queryParameters.containsKey("pgn"))
+        {
+            for (String _sanMove : _queryParameters.get("pgn").split(" "))
+            {
+                if (_sanMove == null || _sanMove.length() == 0)
+                    continue;
+                
+                if (Character.isDigit(_sanMove.charAt(0)))
+                    continue;
+
+                _engine.getBoard().doMove(_sanMove);
+            }
+        }
+
+        else if (_queryParameters.containsKey("fen"))
+            _engine.getBoard().loadFromFen(_queryParameters.get("fen"));
 
         return new MoveResponse(_engine.FindBestMove(_numPlies, true, true, true, null).getMove().toString());
     }
