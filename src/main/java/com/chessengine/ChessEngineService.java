@@ -20,7 +20,7 @@ import com.github.bhlangonijr.chesslib.move.MoveGenerator;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ChessEngine
+public class ChessEngineService
 {
     @Setter
     @Getter
@@ -179,7 +179,7 @@ public class ChessEngine
     //#endregion
     //#endregion
 
-    public ChessEngine(Board _board)
+    public ChessEngineService(Board _board)
     {
         board = _board;
         rand = new Random();
@@ -204,7 +204,7 @@ public class ChessEngine
     boolean _shouldUseHeuristicMoveOrdering, boolean _shouldUseQuiescence,
     MutableInt _numMovesEvaluatedReciever) throws IllegalArgumentException
     {
-        //#region Exit conditions
+        //#region Initial exit conditions
         if (board.isDraw())
             return new ScoredMove(new Move(Square.NONE, Square.NONE), 0f);
 
@@ -213,10 +213,10 @@ public class ChessEngine
             Square _whiteKingLocation = board.getKingSquare(Side.WHITE);
 
             if (board.squareAttackedBy(_whiteKingLocation, Side.BLACK) != 0L)
-                return new ScoredMove(new Move(Square.NONE, Square.NONE), -Float.MAX_VALUE);
+                return new ScoredMove(new Move(Square.NONE, Square.NONE), Float.MAX_VALUE * GetSideMultiplier());
 
             else
-                return new ScoredMove(new Move(Square.NONE, Square.NONE), Float.MAX_VALUE);
+                return new ScoredMove(new Move(Square.NONE, Square.NONE), Float.MAX_VALUE * GetSideMultiplier());
         }
         //#endregion
 
@@ -238,6 +238,8 @@ public class ChessEngine
         float _beta = Float.MAX_VALUE;
 
         List<ScoredMove> _equalMoves = new ArrayList<>();
+
+        System.out.println(_legalMoves);
 
         for (Move _curMove : _legalMoves)
         {
@@ -292,7 +294,7 @@ public class ChessEngine
         _bestMoveForSide = new ScoredMove
         (
             _bestMoveForSide.getMove(),
-            (board.getSideToMove() == Side.WHITE ? 1 : -1) * _bestMoveForSide.getScore()
+            GetSideMultiplier() * _bestMoveForSide.getScore()
         );
 
         return _bestMoveForSide;
@@ -323,10 +325,10 @@ public class ChessEngine
             Square _whiteKingLocation = board.getKingSquare(Side.WHITE);
 
             if (board.squareAttackedBy(_whiteKingLocation, Side.BLACK) != 0L)
-                return -Float.MAX_VALUE;
+                return Float.MAX_VALUE * GetSideMultiplier();
 
             // if white king is not attacked, black king must be mated
-            else return Float.MAX_VALUE;
+            else return Float.MAX_VALUE * GetSideMultiplier();
         }
 
         if (_ply > _numPlies)
@@ -335,18 +337,15 @@ public class ChessEngine
                 _numPositionsEvaluatedReciever.increment();
 
             if (_shouldUseQuiescence)
-                return Quiescence(_alpha, _beta) * (board.getSideToMove() == Side.WHITE ? 1 : -1);
+                return Quiescence(_alpha, _beta) * GetSideMultiplier();
 
-            return Evaluate(false) * (board.getSideToMove() == Side.WHITE ? 1 : -1);
+            return Evaluate(false) * GetSideMultiplier();
         }
         //#endregion
 
         List<Move> _sortedLegalMoves = board.legalMoves();
 
         if (_shouldUseHeuristicMoveOrdering) SortMovesHeuristically(_sortedLegalMoves, false, false);
-
-        if (board.getHistory().contains(2797811396367972536L))
-            System.out.println(_sortedLegalMoves);
 
         for (Move _curMove : _sortedLegalMoves)
         {
@@ -368,12 +367,12 @@ public class ChessEngine
     
     public float Quiescence(float _alpha, float _beta)
     {
-        float _standPat = Evaluate(false) * (board.getSideToMove() == Side.WHITE ? 1 : -1);
+        float _standPat = Evaluate(false) * GetSideMultiplier();
 
         if (_standPat >= _beta)
         {
-            if (board.getHistory().contains(8350203091080959822L))
-                System.out.println("Doing a cutoff. Stand pat of " + board.getFen() + " is " + _standPat);
+            // if (board.getHistory().contains(4232603434365899186L))
+            //     System.out.println("Doing a cutoff. Stand pat of " + board.getFen() + " is " + _standPat);
             return _standPat;
         }
         _alpha = Math.max(_alpha, _standPat);
@@ -386,12 +385,12 @@ public class ChessEngine
             float _eval = -Quiescence(-_beta, -_alpha);
             board.undoMove();
 
-            if (board.getHistory().contains(8350203091080959822L))
-            {
-                System.out.println("Evaluation of move " + _capture
-                + " for " + board.getSideToMove() + " is " + _eval);
-                System.out.println();
-            }
+            // if (board.getHistory().contains(4232603434365899186L))
+            // {
+            //     System.out.println("Evaluation of move " + _capture
+            //     + " for " + board.getSideToMove() + " is " + _eval);
+            //     System.out.println();
+            // }
 
             if (_eval >= _beta)
                 return _eval;
@@ -411,20 +410,29 @@ public class ChessEngine
      */
     public float Evaluate(boolean _debug)
     {
+        Square _whiteKingLocation = board.getFistPieceLocation(Piece.WHITE_KING);
+        
+        if (board.isMated())
+        {
+            if (board.squareAttackedBy(_whiteKingLocation, Side.BLACK) != 0L)
+                return -Float.MAX_VALUE;
+
+            else return Float.MAX_VALUE;
+        }
+        
         List<Square> _whitePawnLocations = board.getPieceLocation(Piece.WHITE_PAWN);
         List<Square> _whiteKnightLocations = board.getPieceLocation(Piece.WHITE_KNIGHT);
         List<Square> _whiteBishopLocations = board.getPieceLocation(Piece.WHITE_BISHOP);
         List<Square> _whiteRookLocations = board.getPieceLocation(Piece.WHITE_ROOK);
         Square _whiteQueenLocation = board.getFistPieceLocation(Piece.WHITE_QUEEN);
-        Square _whiteKingLocation = board.getFistPieceLocation(Piece.WHITE_KING);
         boolean _isThereWhiteQueen = _whiteQueenLocation != Square.NONE;
-
+        
+        Square _blackKingLocation = board.getFistPieceLocation(Piece.BLACK_KING);
         List<Square> _blackPawnLocations = board.getPieceLocation(Piece.BLACK_PAWN);
         List<Square> _blackKnightLocations = board.getPieceLocation(Piece.BLACK_KNIGHT);
         List<Square> _blackBishopLocations = board.getPieceLocation(Piece.BLACK_BISHOP);
         List<Square> _blackRookLocations = board.getPieceLocation(Piece.BLACK_ROOK);
         Square _blackQueenLocation = board.getFistPieceLocation(Piece.BLACK_QUEEN);
-        Square _blackKingLocation = board.getFistPieceLocation(Piece.BLACK_KING);
         boolean _isThereBlackQueen = _blackQueenLocation != Square.NONE;
 
         final float _ENDGAME_WEIGHT = CalculateEndgameWeight
@@ -1028,6 +1036,11 @@ public class ChessEngine
             _clampTarget = _min;
 
         return _clampTarget;
+    }
+    
+    private int GetSideMultiplier()
+    {
+        return board.getSideToMove() == Side.WHITE ? 1 : -1;
     }
     //#endregion
 }
