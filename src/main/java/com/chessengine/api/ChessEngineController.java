@@ -14,6 +14,13 @@ import com.github.bhlangonijr.chesslib.Board;
 @RestController
 public class ChessEngineController
 {
+    private static final String NUM_PLIES_PARAM = "numPlies";
+
+    private static final String PGN_PARAM = "pgn";
+    private static final String FEN_PARAM = "fen";
+
+    private static final String QUIESCENCE_BOOL_PARAM = "shouldUseQuiescence";
+
     @GetMapping("/api/move")
     @CrossOrigin(origins = {"https://epic-chess-engine.onrender.com/",
     "https://epic-chess-engine.netlify.app/", "http://localhost:3000/"})
@@ -22,16 +29,16 @@ public class ChessEngineController
         ChessEngineService _engine = new ChessEngineService(new Board());
 
         int _numPlies = 3;
-        if (_queryParameters.containsKey("numPlies"))
+        if (_queryParameters.containsKey(NUM_PLIES_PARAM))
         {
-            try { _numPlies = Integer.parseInt(_queryParameters.get("numPlies")); }
+            try { _numPlies = Integer.parseInt(_queryParameters.get(NUM_PLIES_PARAM)); }
             catch (Exception _e) {}
         }
 
         // load from pgn if provided
-        if (_queryParameters.containsKey("pgn"))
+        if (_queryParameters.containsKey(PGN_PARAM))
         {
-            for (String _sanMove : _queryParameters.get("pgn").split(" "))
+            for (String _sanMove : _queryParameters.get(PGN_PARAM).split(" "))
             {
                 if (_sanMove == null || _sanMove.length() == 0)
                     continue;
@@ -43,9 +50,13 @@ public class ChessEngineController
             }
         }
 
-        else if (_queryParameters.containsKey("fen"))
-            _engine.getBoard().loadFromFen(_queryParameters.get("fen"));
+        else if (_queryParameters.containsKey(FEN_PARAM))
+            _engine.getBoard().loadFromFen(_queryParameters.get(FEN_PARAM));
 
-        return new MoveResponse(_engine.FindBestMove(_numPlies, true, true, true, null).getMove().toString());
+        boolean _shouldUseQuiescence = true;
+        if (_queryParameters.containsKey(QUIESCENCE_BOOL_PARAM))
+            _shouldUseQuiescence = Boolean.parseBoolean(_queryParameters.get(QUIESCENCE_BOOL_PARAM));
+
+        return new MoveResponse(_engine.FindBestMove(_numPlies, true, true, _shouldUseQuiescence, null).getMove().toString());
     }
 }
