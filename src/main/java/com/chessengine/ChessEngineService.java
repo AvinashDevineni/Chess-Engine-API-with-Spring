@@ -239,8 +239,6 @@ public class ChessEngineService
 
         List<ScoredMove> _equalMoves = new ArrayList<>();
 
-        System.out.println(_legalMoves);
-
         for (Move _curMove : _legalMoves)
         {
             board.doMove(_curMove);
@@ -328,7 +326,7 @@ public class ChessEngineService
                 return -Float.MAX_VALUE;
 
             // if white king is not attacked, black king must be mated
-            else return Float.MAX_VALUE * GetSideMultiplier();
+            else return Float.MAX_VALUE;
         }
 
         if (_ply > _numPlies)
@@ -337,7 +335,7 @@ public class ChessEngineService
                 _numPositionsEvaluatedReciever.increment();
 
             if (_shouldUseQuiescence)
-                return Quiescence(_alpha, _beta) * GetSideMultiplier();
+                return Quiescence(_alpha, _beta);
 
             return Evaluate(false) * GetSideMultiplier();
         }
@@ -359,7 +357,8 @@ public class ChessEngineService
 
             _alpha = Math.max(_alpha, _eval);
 
-            if (_shouldUseAlphaBetaPruning && _alpha >= _beta) return _beta;
+            if (_shouldUseAlphaBetaPruning && _alpha >= _beta)
+                return _beta;
         }
 
         return _alpha;
@@ -370,11 +369,8 @@ public class ChessEngineService
         float _standPat = Evaluate(false) * GetSideMultiplier();
 
         if (_standPat >= _beta)
-        {
-            // if (board.getHistory().contains(4232603434365899186L))
-            //     System.out.println("Doing a cutoff. Stand pat of " + board.getFen() + " is " + _standPat);
             return _standPat;
-        }
+        
         _alpha = Math.max(_alpha, _standPat);
 
         List<Move> _captures = MoveGenerator.generatePseudoLegalCaptures(board);        
@@ -384,13 +380,6 @@ public class ChessEngineService
             board.doMove(_capture);
             float _eval = -Quiescence(-_beta, -_alpha);
             board.undoMove();
-
-            // if (board.getHistory().contains(4232603434365899186L))
-            // {
-            //     System.out.println("Evaluation of move " + _capture
-            //     + " for " + board.getSideToMove() + " is " + _eval);
-            //     System.out.println();
-            // }
 
             if (_eval >= _beta)
                 return _eval;

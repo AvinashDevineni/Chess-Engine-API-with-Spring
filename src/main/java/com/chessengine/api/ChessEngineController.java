@@ -2,7 +2,6 @@ package com.chessengine.api;
 
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +22,7 @@ public class ChessEngineController
 
     @GetMapping("/api/move")
     @CrossOrigin(origins = {"https://epic-chess-engine.onrender.com/",
-    "https://epic-chess-engine.netlify.app/", "http://localhost:3000/"})
+    "https://epic-chess-engine.netlify.app/"})
     public MoveResponse GetEngineMove(@RequestParam Map<String, String> _queryParameters)
     {
         ChessEngineService _engine = new ChessEngineService(new Board());
