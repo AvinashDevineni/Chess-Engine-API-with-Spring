@@ -45,7 +45,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'src.main.java.com.chessengine.api.ChessEngineApplication'
+    mainClass = 'com.chessengine.api.ChessEngineApplication'
 }
 
 tasks.named('test') {
