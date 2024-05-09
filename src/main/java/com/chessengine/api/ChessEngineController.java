@@ -34,7 +34,10 @@ public class ChessEngineController
             catch (Exception _e) {}
         }
 
-        // load from pgn if provided
+        // allow both fen and pgn
+        if (_queryParameters.containsKey(FEN_PARAM))
+            _engine.getBoard().loadFromFen(_queryParameters.get(FEN_PARAM));
+
         if (_queryParameters.containsKey(PGN_PARAM))
         {
             for (String _sanMove : _queryParameters.get(PGN_PARAM).split(" "))
@@ -48,9 +51,6 @@ public class ChessEngineController
                 _engine.getBoard().doMove(_sanMove);
             }
         }
-
-        else if (_queryParameters.containsKey(FEN_PARAM))
-            _engine.getBoard().loadFromFen(_queryParameters.get(FEN_PARAM));
 
         boolean _shouldUseQuiescence = true;
         if (_queryParameters.containsKey(QUIESCENCE_BOOL_PARAM))
