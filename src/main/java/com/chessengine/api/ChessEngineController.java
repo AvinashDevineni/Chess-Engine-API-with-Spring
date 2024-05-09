@@ -18,11 +18,11 @@ public class ChessEngineController
     private static final String PGN_PARAM = "pgn";
     private static final String FEN_PARAM = "fen";
 
-    private static final String QUIESCENCE_BOOL_PARAM = "shouldUseQuiescence";
+    private static final String QUIESCENCE_BOOL_PARAM = "useQuiescence";
 
     @GetMapping("/api/move")
     @CrossOrigin(origins = {"https://epic-chess-engine.onrender.com/",
-    "https://epic-chess-engine.netlify.app/"})
+    "https://epic-chess-engine.netlify.app/", "https://avashthegoat.github.io/Chess-Site/"})
     public MoveResponse GetEngineMove(@RequestParam Map<String, String> _queryParameters)
     {
         ChessEngineService _engine = new ChessEngineService(new Board());
