@@ -35,7 +35,7 @@ public class ChessEngineController
         }
 
         // allow both fen and pgn
-        if (_queryParameters.containsKey(FEN_PARAM))
+        if (_queryParameters.containsKey(FEN_PARAM) && _queryParameters.get(FEN_PARAM) != "")
             _engine.getBoard().loadFromFen(_queryParameters.get(FEN_PARAM));
 
         if (_queryParameters.containsKey(PGN_PARAM))
