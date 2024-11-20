@@ -22,7 +22,7 @@ public class ChessEngineController
 
     @GetMapping("/api/move")
     @CrossOrigin(origins = {"https://epic-chess-engine.onrender.com/",
-    "https://epic-chess-engine.netlify.app/", "https://avinashdevineni.github.io/Chess-Site/",
+    "https://epic-chess-engine.netlify.app/", "https://avinashdevineni.github.io",
     "http://localhost:5173"})
     public MoveResponse GetEngineMove(@RequestParam Map<String, String> _queryParameters)
     {
